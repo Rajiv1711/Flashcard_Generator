@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Flashcard Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #ff416c;
+            box-shadow: 0 0 0 3px rgba(255, 65, 108, 0.2);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 176, 155, 0.4);
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 176, 155, 0.6);
+        }
+        
+        .flashcards-container {
+            /* display: none; */
+            margin-top: 30px;
+        }
+        
+        .flashcard {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .question {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .answer {
+            font-size: 1.4rem;
+            color: #3498db;
+            text-align: center;
+            line-height: 1.5;
+            /* display: none; */
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .show-answer {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+        }
+        
+        .prev {
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
+            color: white;
+        }
+        
+        .next {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .feedback {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feedback-btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .yes {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .no {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .counter {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            border-radius: 10px;
+            width: 20%;
+            transition: width 0.5s ease;
+        }
+        
+        .card-count {
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 25px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ff416c;
+        }
+        .initially-hidden {
+            display: none;
+        }
+        .hidden {
+            display: none !important;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background-color: #fdeded;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .controls, .feedback {
+                flex-wrap: wrap;
+            }
+            
+            .btn, .feedback-btn {
+                flex: 1 0 45%;
+                margin-bottom: 10px;
+            }
+            
+            .question {
+                font-size: 1.4rem;
+            }
+            
+            .answer {
+                font-size: 1.2rem;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Interactive Flashcard Generator</h1>
+            <p class="subtitle">Transform any text into interactive learning cards</p>
+        </header>
+        
+        <div class="content">
+            <div class="input-section">
+                <h2>Enter Your Learning Material</h2>
+                <textarea id="content-input" placeholder="Paste educational text here..."></textarea>
+                <br><br>
+                <button id="generate-btn" class="generate-btn">
+                    Generate Flashcards
+                    <span id="loading-spinner" class="loading hidden"></span>
+                </button>
+                <div id="error-message" class="error hidden"></div>
+            </div>
+            
+            <div id="flashcards-container" class="flashcards-container hidden">
+                <!-- Flashcards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const contentInput = document.getElementById('content-input');
+            const generateBtn = document.getElementById('generate-btn');
+            const flashcardsContainer = document.getElementById('flashcards-container');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            
+            // State variables
+            let flashcards = [];
+            let currentCardIndex = 0;
+            let reviewedCards = 0;
+            let masteredCards = 0;
+            
+            // Event listeners
+            generateBtn.addEventListener('click', generateFlashcards);
+            
+            async function generateFlashcards() {
+                const text = contentInput.value.trim();
+                
+                if (!text) {
+                    showError("Please enter some text to generate flashcards");
+                    return;
+                }
+                
+                try {
+                    // Show loading state
+                    generateBtn.disabled = true;
+                    loadingSpinner.classList.remove('hidden');
+                    errorMessage.classList.add('hidden');
+                    flashcardsContainer.classList.add('hidden');
+                    
+                    // Send request to backend
+                    const response = await fetch('/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `text=${encodeURIComponent(text)}`
+                    });
+                    
+                    const result = await response.json();
+                    console.log("API Response:", result);
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    
+                    if (!result.flashcards || result.flashcards.length === 0) {
+                        throw new Error("No flashcards generated. Please try different text.");
+                    }
+                    
+                    // Process response
+                    flashcards = result.flashcards;
+                    currentCardIndex = 0;
+                    reviewedCards = 0;
+                    masteredCards = 0;
+                    
+                    // Render flashcards
+                    renderFlashcards();
+                    
+                } catch (error) {
+                    showError(error.message);
+                    console.error("Error:", error);
+                } finally {
+                    // Reset UI
+                    generateBtn.disabled = false;
+                    loadingSpinner.classList.add('hidden');
+                }
+            }
+            
+            function renderFlashcards() {
+            // Show the flashcards container
+            flashcardsContainer.classList.remove('hidden');
+            
+            // Create flashcards HTML structure
+            flashcardsContainer.innerHTML = `
+                <div class="counter">Flashcard <span id="current-card">1</span> of <span id="total-cards">${flashcards.length}</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar" style="width: ${(1/flashcards.length)*100}%"></div>
+                </div>
+                
+                <div class="flashcard">
+                    <div id="question" class="question"></div>
+                    <div id="answer" class="answer hidden"></div>
+                </div>
+                
+                <div class="controls">
+                    <button id="prev-btn" class="btn prev">Previous</button>
+                    <button id="show-answer-btn" class="btn show-answer">Show Answer</button>
+                    <button id="next-btn" class="btn next">Next</button>
+                </div>
+                
+                <div id="feedback-section" class="feedback">
+                    <p>Did you know this?</p>
+                    <button id="yes-btn" class="feedback-btn yes">Yes, I knew it!</button>
+                    <button id="no-btn" class="feedback-btn no">No, I need to review</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div>Cards Reviewed</div>
+                        <div class="stat-value" id="reviewed-count">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>Mastered</div>
+                        <div class="stat-value" id="mastered-count">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div>To Review</div>
+                        <div class="stat-value" id="review-count">0</div>
+                    </div>
+                </div>
+            `;
+            
+            // Set initial content with proper Unicode handling
+            const questionElement = document.getElementById('question');
+            const answerElement = document.getElementById('answer');
+            
+            questionElement.textContent = flashcards[0].question;
+            answerElement.textContent = flashcards[0].answer;
+            
+            // Add event listeners
+            document.getElementById('show-answer-btn').addEventListener('click', toggleAnswer);
+            document.getElementById('prev-btn').addEventListener('click', showPreviousCard);
+            document.getElementById('next-btn').addEventListener('click', showNextCard);
+            document.getElementById('yes-btn').addEventListener('click', () => handleFeedback(true));
+            document.getElementById('no-btn').addEventListener('click', () => handleFeedback(false));
+            
+            updateStats();
+        }
+
+        function updateCardDisplay() {
+            const currentCard = flashcards[currentCardIndex];
+            const questionElement = document.getElementById('question');
+            const answerElement = document.getElementById('answer');
+            
+            questionElement.textContent = currentCard.question;
+            answerElement.textContent = currentCard.answer;
+            answerElement.classList.add('hidden');
+            document.getElementById('show-answer-btn').textContent = 'Show Answer';
+            document.getElementById('current-card').textContent = currentCardIndex + 1;
+            
+            // Update progress bar
+            const progress = ((currentCardIndex + 1) / flashcards.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+            
+            function toggleAnswer() {
+                const answerElement = document.getElementById('answer');
+                const showAnswerBtn = document.getElementById('show-answer-btn');
+                
+                if (answerElement.classList.contains('hidden')) {
+                    answerElement.classList.remove('hidden');
+                    showAnswerBtn.textContent = 'Hide Answer';
+                } else {
+                    answerElement.classList.add('hidden');
+                    showAnswerBtn.textContent = 'Show Answer';
+                }
+            }
+            
+            function showPreviousCard() {
+                if (currentCardIndex > 0) {
+                    currentCardIndex--;
+                    updateCardDisplay();
+                }
+            }
+            
+            function showNextCard() {
+                if (currentCardIndex < flashcards.length - 1) {
+                    currentCardIndex++;
+                    updateCardDisplay();
+                }
+            }
+            
+            // function updateCardDisplay() {
+            //     const currentCard = flashcards[currentCardIndex];
+            //     document.getElementById('question').textContent = currentCard.question;
+            //     document.getElementById('answer').textContent = currentCard.answer;
+            //     document.getElementById('answer').classList.add('hidden');
+            //     document.getElementById('show-answer-btn').textContent = 'Show Answer';
+            //     document.getElementById('current-card').textContent = currentCardIndex + 1;
+                
+            //     // Update progress bar
+            //     const progress = ((currentCardIndex + 1) / flashcards.length) * 100;
+            //     document.getElementById('progress-bar').style.width = `${progress}%`;
+            // }
+            
+            function handleFeedback(knewIt) {
+                reviewedCards++;
+                
+                if (knewIt && !flashcards[currentCardIndex].mastered) {
+                    flashcards[currentCardIndex].mastered = true;
+                    masteredCards++;
+                } else if (!knewIt && flashcards[currentCardIndex].mastered) {
+                    flashcards[currentCardIndex].mastered = false;
+                    masteredCards--;
+                }
+                
+                if (currentCardIndex < flashcards.length - 1) {
+                    showNextCard();
+                }
+                
+                updateStats();
+            }
+            
+            function updateStats() {
+                document.getElementById('reviewed-count').textContent = reviewedCards;
+                document.getElementById('mastered-count').textContent = masteredCards;
+                document.getElementById('review-count').textContent = flashcards.length - masteredCards;
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+                flashcardsContainer.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
