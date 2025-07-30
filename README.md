@@ -1,6 +1,6 @@
 # Interactive Flashcard Generator
 
-![Flashcard Generator Demo]
+[Flashcard Generator Demo]
 
 Transform any educational text into interactive flashcards using AI. This web application leverages TinyLLaMA to generate question-answer pairs from your input text, creating an efficient learning experience.
 
